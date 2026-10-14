@@ -7,6 +7,8 @@
 
 A Python command-line tool that finds YouTube creators in a niche, checks how big and how active they are, and ranks them with a simple score. It uses the free YouTube Data API v3, reads metadata only (no videos are ever downloaded), and keeps going when individual channels are broken, deleted or restricted.
 
+*Example output: 10 Indian finance creators ranked from 0 to 100 on how active and engaging they are. Teal bars posted in the last 30 days; grey bars have gone quiet.*
+
 ![Potential score of 10 Indian finance creators](docs/results_chart.png)
 
 [Setup](#setup) · [Search options](#configuring-the-search-parameters) · [Authentication](#handling-authentication) · [Output](#output) · [Free-tier limits](#staying-within-the-free-limits)
@@ -14,7 +16,7 @@ A Python command-line tool that finds YouTube creators in a niche, checks how bi
 > [!TIP]
 > After setup, one command finds, audits and ranks creators:
 > ```bash
-> python discovery_engine.py --keyword finance --region IN --strict-region --max-channels 10
+> python discovery_engine.py --keyword finance --region IN --strict-region --language en --max-channels 10 
 > ```
 
 ## What it does
@@ -69,7 +71,7 @@ Done: 2 succeeded, 3 failed.
 Requires Python 3.7 or newer. The code avoids newer-only syntax and the dependencies are pinned to versions that support 3.7. It was developed and run on Python 3.11.
 
 ```bash
-git clone <this-repo-url>
+git clone https://github.com/parineetarao/influencer-discovery-engine
 cd influencer-discovery-engine
 python -m venv venv
 
