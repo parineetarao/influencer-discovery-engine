@@ -503,13 +503,34 @@ def sort_by_score(rows):
     return sorted(rows, key=key)
 
 
+def writable_path(path):
+    """Return path if it can be written, else a timestamped alternative.
+
+    A file that is open in Excel is locked on Windows; saving to a new name
+    keeps the run's results instead of crashing at the very last step.
+    """
+    try:
+        open(path, "a").close()
+        return path
+    except OSError:
+        base, ext = os.path.splitext(path)
+        alternative = "{}_{}{}".format(base, datetime.now().strftime("%H%M%S"), ext)
+        print("Warning: {} cannot be written (is it open in another program?). "
+              "Saving to {} instead.".format(path, alternative))
+        return alternative
+
+
 def write_outputs(rows, json_path="output.json", csv_path="output.csv"):
+    """Write the JSON and CSV reports. Returns the paths actually used."""
+    json_path = writable_path(json_path)
+    csv_path = writable_path(csv_path)
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(rows, f, indent=2, ensure_ascii=False)
     with open(csv_path, "w", newline="", encoding="utf-8-sig") as f:
         writer = csv.DictWriter(f, fieldnames=FIELDNAMES, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)
+    return json_path, csv_path
 
 
 def main():
@@ -579,7 +600,7 @@ def main():
                           cache=None if args.no_cache else load_cache(),
                           cache_hours=args.cache_hours)
     rows = sort_by_score(rows)
-    write_outputs(rows)
+    json_path, csv_path = write_outputs(rows)
 
     ok = sum(1 for r in rows if r["status"] == "OK")
     print("Done: {} succeeded, {} failed.".format(ok, len(rows) - ok))
@@ -590,7 +611,7 @@ def main():
             print("  {} ({}/100) - {}".format(r["channel_name"], r["potential_score"], r["activity"]))
     print("Quota used: {} this run, {} today / {} (as tracked by this tool)".format(
         client.run_quota, client.quota_used, DAILY_QUOTA))
-    print("Results saved to output.json and output.csv")
+    print("Results saved to {} and {}".format(json_path, csv_path))
 
 
 if __name__ == "__main__":

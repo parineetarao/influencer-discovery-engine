@@ -1,6 +1,21 @@
 # Influencer Discovery & Audit Tool
 
+![Python 3.7+](https://img.shields.io/badge/python-3.7%2B-3776AB?logo=python&logoColor=white)
+![YouTube Data API v3](https://img.shields.io/badge/YouTube%20Data%20API-v3-FF0000?logo=youtube&logoColor=white)
+![Free tier](https://img.shields.io/badge/runs%20on-free%20tier-0f9d8a)
+![Metadata only](https://img.shields.io/badge/data-metadata%20only-1f2937)
+
 A Python command-line tool that finds YouTube creators in a niche, checks how big and how active they are, and ranks them with a simple score. It uses the free YouTube Data API v3, reads metadata only (no videos are ever downloaded), and keeps going when individual channels are broken, deleted or restricted.
+
+![Potential score of 10 Indian finance creators](docs/results_chart.png)
+
+[Setup](#setup) · [Search options](#configuring-the-search-parameters) · [Authentication](#handling-authentication) · [Output](#output) · [Free-tier limits](#staying-within-the-free-limits)
+
+> [!TIP]
+> After setup, one command finds, audits and ranks creators:
+> ```bash
+> python discovery_engine.py --keyword finance --region IN --strict-region --max-channels 10
+> ```
 
 ## What it does
 
@@ -23,19 +38,19 @@ flowchart LR
 
 ## Sample results
 
-A real run on Indian finance creators, ranked by potential score:
+The chart above comes from a real run on Indian finance creators. This is the command, and the live progress it prints:
 
-![Potential score of 10 Indian finance creators](docs/results_chart.png)
+```bash
+python discovery_engine.py --keyword finance --region IN --strict-region --language en --max-channels 10
+```
 
-| Creator | Subscribers | Last upload | Activity | Score |
-|---|---:|---|---|---:|
-| Finance With Sharan | 3,740,000 | 2026-10-13 | Active | 100 |
-| Finance Files by CA | 32,400 | 2026-10-11 | Active | 90 |
-| 1 Finance Private Limited | 16,300 | 2026-10-13 | Active | 88 |
-| ... | | | | |
-| Janhavi Unfiltered Finance | 11,000 | 2026-04-17 | Inactive | 31 |
+![Live progress in the terminal](docs/terminal.png)
 
-The full results are in `sample_output.csv`, audited on 14 October 2026. A second run with deliberately broken inputs, showing the error handling, is in `sample_output_errors.csv`:
+And the report it produces, ranked by potential score:
+
+![First rows of the generated report](docs/report_preview.png)
+
+The full results are in `sample_output.csv`, audited on 14 October 2026. Spreadsheet apps may display the dates in your regional format, but the file itself uses `YYYY-MM-DD`. A second run with deliberately broken inputs, showing the error handling, is in `sample_output_errors.csv`:
 
 ```text
 Processing: @googledevelopers
@@ -99,7 +114,8 @@ YOUTUBE_API_KEY=your_key_here
 | `--no-cache` | Ignore saved audits and fetch everything fresh | `--no-cache` |
 | `--cache-hours` | Reuse a saved audit if it is newer than this many hours (default 24) | `--cache-hours 6` |
 
-`--region` on its own is only a relevance hint to YouTube's search. Add `--strict-region` when you need a hard filter.
+> [!NOTE]
+> `--region` on its own is only a relevance hint to YouTube's search. Add `--strict-region` when you need a hard filter.
 
 ```bash
 # Discover finance creators in India and audit the top 10
@@ -150,6 +166,8 @@ Fields that cannot be computed show `N/A`. Because `days_since_last_upload` and 
 
 The YouTube Data API gives each project a free daily quota (10,000 units at the time of writing; check the Cloud Console for your project). Requests differ greatly in cost, so the tool is built around the cheap ones:
 
+![A 10-creator audit uses about 1% of the free daily quota](docs/quota_bar.png)
+
 | Request | Approx. cost | How it is used |
 |---|---:|---|
 | `search` | 100 units | One search per run, never one per video |
@@ -164,6 +182,16 @@ A 10-creator audit costs roughly 111 units, about 1% of the daily quota. Other o
 - Units used are tracked in `.quota_state.json` and reset when the Pacific-time day changes, and a request that would exceed the daily limit is refused. The tool only counts its own usage on this machine, so the Cloud Console remains the source of truth.
 
 ## Reliability
+
+```mermaid
+flowchart TD
+    S["Next channel in the batch"] --> Q{"Can we reach it?"}
+    Q -- "Yes" --> OK["Collect stats and<br/>recent uploads"] --> N["Save the row"]
+    Q -- "Temporary problem" --> R["Wait, then retry<br/>(up to 3 times)"] --> Q
+    Q -- "Deleted, private<br/>or bad link" --> E["Write an<br/>Error: [reason] row"]
+    N --> NX["Move on to the next channel"]
+    E --> NX
+```
 
 | If this happens... | The tool... |
 |---|---|
@@ -188,6 +216,10 @@ A simple, explainable score out of 100, calculated from data already fetched (no
 
 Channels that are not active have their score halved. If data is missing, the score is `N/A` instead of a guess.
 
+![What drives each score](docs/score_breakdown.png)
+
+Each bar shows how the four signals add up for the creators in the sample run.
+
 ## Limitations
 
 - Keyword search mainly matches channel names and descriptions, so results are channels named after the niche rather than every channel that covers it.
@@ -208,10 +240,14 @@ influencer-discovery-engine/
 ├── sample_output.csv / .json           sample audit of 10 creators
 ├── sample_output_errors.csv / .json    sample run showing error handling
 └── docs/
-    ├── results_chart.png               chart used in this README
-    └── make_chart.py                   regenerates the chart from sample_output.csv
+    ├── results_chart.png               ranking chart used in this README
+    ├── score_breakdown.png             score composition chart
+    ├── report_preview.png              first rows of the report
+    ├── terminal.png                    screenshot of a live run
+    ├── quota_bar.png                   free-quota usage graphic
+    └── make_chart.py                   regenerates the charts from sample_output.csv
 ```
 
 ## About the builder
 
-I'm Parineeta Rao, a final-year B.Tech student in AI & Data Science at K.J. Somaiya Institute of Technology, Mumbai. I've completed two AI internships and like building tools that are technically solid and easy for non-technical teammates to use. As part of the Gen Z audience that creators are trying to reach, I also enjoy looking at this space from the viewer's side.
+I'm Parineeta Rao, a final-year B.Tech student in AI & Data Science at K.J. Somaiya Institute of Technology, Mumbai. I've completed two AI internships and like building tools that are technically solid and easy for non-technical teammates to use.

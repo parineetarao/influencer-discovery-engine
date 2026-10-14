@@ -1,6 +1,11 @@
-﻿channel_id,channel_name,country,subscribers,total_views,video_count,recent_upload_dates,last_upload_date,status
-UC_x5XG1OV2P6uZZ5FSM9Ttw,Google for Developers,US,2680000,361448078,6112,"2026-10-13, 2026-10-09, 2026-10-09, 2026-10-09, 2026-10-08",2026-10-13,OK
-UClECEb3c-nxpNPbaIsDeprA,Finance with Dinesh,IN,8160,628084,172,"2026-10-13, 2026-10-12, 2026-10-11, 2026-10-10, 2026-10-09",2026-10-13,OK
-@this-handle-does-not-exist-12345,,,N/A,N/A,N/A,N/A,N/A,"Error: Channel not found, deleted, or restricted"
-UCfakefakefakefakefake00,,,N/A,N/A,N/A,N/A,N/A,"Error: Channel not found, deleted, or restricted"
-https://example.com/not-a-youtube-link,,,N/A,N/A,N/A,N/A,N/A,Error: unsupported or malformed channel URL
+﻿channel_id,channel_name,country,subscribers,total_views,video_count,recent_upload_dates,last_upload_date,days_since_last_upload,avg_days_between_uploads,activity,avg_views_per_video,potential_score,status
+UCwVEhEzsjLym_u1he4XWFkg,Finance With Sharan,IN,3740000,1393543824,1153,"2026-10-13, 2026-10-12, 2026-10-11, 2026-10-10, 2026-10-09",2026-10-13,1,1.0,Active,1208624,100,OK
+UCDkoeHf-HnQlcHg3l6R1oow,N V Finance,IN,79200,8963470,354,"2026-10-12, 2026-10-11, 2026-10-07, 2026-10-06, 2026-10-01",2026-10-12,2,2.8,Active,25321,93,OK
+UCRuN_dGk0-VRL0L-knJPf8Q,ATUL VERMA / Takhatiya Finance,IN,45400,2628007,245,"2026-10-13, 2026-10-12, 2026-10-10, 2026-10-08, 2026-10-04",2026-10-13,1,2.2,Active,10727,89,OK
+UCIfANh2BltdF-XixRwKFRqQ,1 Finance Private Limited,IN,16300,28670957,749,"2026-10-13, 2026-10-07, 2026-10-06, 2026-10-06, 2026-10-05",2026-10-13,1,2.0,Active,38279,88,OK
+UCiWsmELbc_wi32-S3ULchZA,Abhishek Rajput Finance,IN,7250,1468462,699,"2026-10-12, 2026-10-09, 2026-10-07, 2026-10-05, 2026-10-02",2026-10-12,2,2.5,Active,2101,86,OK
+UCXzSlkirH197OYJt20qZqvQ,Finance & U,IN,17700,1215378,232,"2026-10-09, 2026-09-26, 2026-09-19, 2026-09-11, 2026-08-31",2026-10-09,5,9.8,Active,5239,85,OK
+UCuZG7tznbwPsonFxrKgQZwA,Finance Dot Com,IN,29600,2071406,365,"2026-10-11, 2026-10-11, 2026-10-07, 2026-10-03, 2026-09-30",2026-10-11,3,2.8,Active,5675,80,OK
+UC_YjyLcl8jun5zetc70XWmA,Finance With Sunil,IN,104000,1935456,161,"2026-10-11, 2026-10-10, 2026-10-04, 2026-10-03, 2026-09-27",2026-10-11,3,3.5,Active,12021,72,OK
+UC_L1DOAiWwFmbzo2qNVkySw,Finance Gyani,IN,297000,7989563,3024,"2026-10-13, 2026-10-14, 2026-10-14, 2026-10-13, 2026-10-13",2026-10-13,0,0.2,Active,2642,58,OK
+UC7nJHEIdV8ySOIOXCQ9tITA,Janhavi Unfiltered Finance,IN,11000,219194,38,"2026-04-17, 2026-04-10, 2026-04-07, 2026-04-03, 2026-03-31",2026-04-17,180,4.2,Inactive,5768,31,OK
