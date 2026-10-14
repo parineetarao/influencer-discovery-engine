@@ -250,4 +250,4 @@ influencer-discovery-engine/
 
 ## About the builder
 
-I'm Parineeta Rao, a final-year B.Tech student in AI & Data Science at K.J. Somaiya Institute of Technology, Mumbai. I've completed two AI internships and like building tools that are technically solid and easy for non-technical teammates to use.
+I'm Parineeta Rao, a final-year B.Tech student in AI & Data Science. I like building AI solutions, making sense of data, and streamlining workflows. 
