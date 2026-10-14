@@ -1,3 +1,8 @@
 venv/
 .env
 __pycache__/
+output.json
+output.csv
+channel_ids.json
+.audit_cache.json
+.quota_state.json
