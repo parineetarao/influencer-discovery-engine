@@ -2,6 +2,7 @@ import argparse
 import csv
 import json
 import os
+import re
 import time
 from datetime import datetime
 from typing import Dict, List
@@ -19,6 +20,7 @@ COSTS = {"search": 100, "channels": 1, "playlistItems": 1}
 BATCH_SIZE = 50
 NOT_FOUND = "Date not found"
 RESTRICTED = "Metric restricted"
+CHANNEL_MISSING = "Error: Channel not found, deleted, or restricted"
 
 
 class QuotaExceeded(Exception):
@@ -114,6 +116,74 @@ def search_channels(client, keyword, region=None, language=None, max_channels=10
     return found[:max_channels]
 
 
+def parse_channel_input(text):
+    """Classify one input line. Returns (kind, value); kind is None if unsupported.
+
+    Supported: channel ID (UC...), @handle, youtube.com/channel/UC...,
+    youtube.com/@handle, youtube.com/user/name.
+    """
+    text = text.strip()
+    if re.match(r"^UC[\w-]{22}$", text):
+        return "id", text
+    if re.match(r"^@[\w.\-]+$", text):
+        return "handle", text
+    match = re.search(r"youtube\.com/channel/(UC[\w-]{22})", text)
+    if match:
+        return "id", match.group(1)
+    match = re.search(r"youtube\.com/(@[\w.\-]+)", text)
+    if match:
+        return "handle", match.group(1)
+    match = re.search(r"youtube\.com/user/([\w.\-]+)", text)
+    if match:
+        return "user", match.group(1)
+    return None, "Error: unsupported or malformed channel URL"
+
+
+def resolve_inputs(client, lines):
+    """Turn input lines (URLs, @handles, IDs) into channel dicts.
+
+    Lines that cannot be resolved are kept with an 'error' key so they
+    appear as error rows in the output instead of being dropped or crashing.
+    """
+    channels = []
+    seen = set()
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+
+        kind, value = parse_channel_input(line)
+        if kind is None:
+            channels.append({"channel_id": line, "title": "",
+                             "input": line, "error": value})
+            continue
+
+        if kind == "id":
+            channel_id = value
+        else:
+            print("Resolving: {}".format(line))
+            param = "forHandle" if kind == "handle" else "forUsername"
+            try:
+                data = client.get("channels",
+                                  {"part": "id", param: value, "fields": "items(id)"})
+            except (ApiError, QuotaExceeded) as exc:
+                channels.append({"channel_id": line, "title": "",
+                                 "input": line, "error": str(exc)})
+                continue
+            items = data.get("items", [])
+            if not items:
+                channels.append({"channel_id": line, "title": "",
+                                 "input": line, "error": CHANNEL_MISSING})
+                continue
+            channel_id = items[0]["id"]
+
+        if channel_id in seen:
+            continue
+        seen.add(channel_id)
+        channels.append({"channel_id": channel_id, "title": "", "input": line})
+    return channels
+
+
 def normalize_date(raw):
     """'2026-10-10T12:30:00Z' -> '2026-10-10' (UTC); 'Date not found' if unusable."""
     if not raw:
@@ -162,13 +232,14 @@ def matches_region(item, region):
 
 def audit_channels(client, channels, recent_count=5, region=None, limit=None):
     """Audit every channel; one bad channel never stops the batch."""
+    by_id = {c["channel_id"]: c for c in channels}
     ids = [c["channel_id"] for c in channels]
-    names = {c["channel_id"]: c.get("title", "") for c in channels}
+    real_ids = [c["channel_id"] for c in channels if not c.get("error")]
     rows = []
 
     batch_error = None
     try:
-        details = fetch_channel_stats(client, ids)
+        details = fetch_channel_stats(client, real_ids)
     except (ApiError, QuotaExceeded) as exc:
         details = {}
         batch_error = str(exc)
@@ -182,10 +253,11 @@ def audit_channels(client, channels, recent_count=5, region=None, limit=None):
         ids = ids[:limit]
 
     for channel_id in ids:
-        print("Processing: {}".format(channel_id))
+        source = by_id[channel_id]
+        print("Processing: {}".format(source.get("input") or channel_id))
         row = {
             "channel_id": channel_id,
-            "channel_name": names.get(channel_id, ""),
+            "channel_name": source.get("title", ""),
             "country": "",
             "subscribers": RESTRICTED,
             "total_views": RESTRICTED,
@@ -196,8 +268,8 @@ def audit_channels(client, channels, recent_count=5, region=None, limit=None):
         }
         item = details.get(channel_id)
 
-        if batch_error or item is None:
-            row["status"] = batch_error or "Error: Channel not found, deleted, or restricted"
+        if source.get("error") or batch_error or item is None:
+            row["status"] = source.get("error") or batch_error or CHANNEL_MISSING
             print(row["status"])
             for key in ("subscribers", "total_views", "video_count",
                         "recent_upload_dates", "last_upload_date"):
@@ -253,6 +325,8 @@ def main():
     parser.add_argument("--ids-file", default="channel_ids.json")
     parser.add_argument("--from-ids-file", action="store_true",
                         help="skip the search and reuse saved channel IDs (saves quota)")
+    parser.add_argument("--input-file",
+                        help="text file with one channel URL, @handle or channel ID per line")
     args = parser.parse_args()
 
     if args.strict_region and not args.region:
@@ -260,13 +334,26 @@ def main():
 
     client = YouTubeClient()
 
-    if args.from_ids_file:
-        with open(args.ids_file, encoding="utf-8") as f:
-            channels = json.load(f)
+    if args.input_file:
+        try:
+            with open(args.input_file, encoding="utf-8-sig") as f:
+                lines = f.read().splitlines()
+        except OSError as exc:
+            print("Error: could not read {} ({})".format(args.input_file, exc.strerror))
+            return
+        channels = resolve_inputs(client, lines)
+        print("Loaded {} channels from {}".format(len(channels), args.input_file))
+    elif args.from_ids_file:
+        try:
+            with open(args.ids_file, encoding="utf-8") as f:
+                channels = json.load(f)
+        except (OSError, ValueError) as exc:
+            print("Error: could not read {} ({})".format(args.ids_file, exc))
+            return
         print("Loaded {} channel IDs from {}".format(len(channels), args.ids_file))
     else:
         if not args.keyword:
-            parser.error("--keyword is required unless --from-ids-file is used")
+            parser.error("--keyword is required unless --input-file or --from-ids-file is used")
         print('Searching YouTube for "{}"...'.format(args.keyword))
         try:
             pool = 50 if args.strict_region else args.max_channels

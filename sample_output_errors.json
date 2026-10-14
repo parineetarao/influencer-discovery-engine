@@ -1,0 +1,57 @@
+[
+  {
+    "channel_id": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+    "channel_name": "Google for Developers",
+    "country": "US",
+    "subscribers": 2680000,
+    "total_views": 361448078,
+    "video_count": 6112,
+    "recent_upload_dates": "2026-10-13, 2026-10-09, 2026-10-09, 2026-10-09, 2026-10-08",
+    "last_upload_date": "2026-10-13",
+    "status": "OK"
+  },
+  {
+    "channel_id": "UClECEb3c-nxpNPbaIsDeprA",
+    "channel_name": "Finance with Dinesh",
+    "country": "IN",
+    "subscribers": 8160,
+    "total_views": 628084,
+    "video_count": 172,
+    "recent_upload_dates": "2026-10-13, 2026-10-12, 2026-10-11, 2026-10-10, 2026-10-09",
+    "last_upload_date": "2026-10-13",
+    "status": "OK"
+  },
+  {
+    "channel_id": "@this-handle-does-not-exist-12345",
+    "channel_name": "",
+    "country": "",
+    "subscribers": "N/A",
+    "total_views": "N/A",
+    "video_count": "N/A",
+    "recent_upload_dates": "N/A",
+    "last_upload_date": "N/A",
+    "status": "Error: Channel not found, deleted, or restricted"
+  },
+  {
+    "channel_id": "UCfakefakefakefakefake00",
+    "channel_name": "",
+    "country": "",
+    "subscribers": "N/A",
+    "total_views": "N/A",
+    "video_count": "N/A",
+    "recent_upload_dates": "N/A",
+    "last_upload_date": "N/A",
+    "status": "Error: Channel not found, deleted, or restricted"
+  },
+  {
+    "channel_id": "https://example.com/not-a-youtube-link",
+    "channel_name": "",
+    "country": "",
+    "subscribers": "N/A",
+    "total_views": "N/A",
+    "video_count": "N/A",
+    "recent_upload_dates": "N/A",
+    "last_upload_date": "N/A",
+    "status": "Error: unsupported or malformed channel URL"
+  }
+]
