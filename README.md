@@ -251,3 +251,4 @@ influencer-discovery-engine/
 ## About the builder
 
 I'm Parineeta Rao, a final-year B.Tech student in AI & Data Science. I like building AI solutions, making sense of data, and streamlining workflows. 
+[LinkedIn](https://www.linkedin.com/in/parineeta-rao-14097a355) · [GitHub](https://github.com/parineetarao)
